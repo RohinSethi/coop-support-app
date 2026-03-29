@@ -136,17 +136,6 @@ coop_app/
         └── evaluate.html   # Submit online form or PDF evaluation
 ```
 
----
-
-## Deployment (Render — Free)
-
-1. Push the repository to GitHub
-2. Sign up at [render.com](https://render.com) and connect your GitHub account
-3. Click **New → Web Service** and select this repository
-4. Render auto-detects `render.yaml` — click **Deploy**
-5. Your public URL will be: `https://coop-support-app.onrender.com`
-
-> On Render's free tier the server sleeps after 15 minutes of inactivity and takes ~30 seconds to wake on the first visit.
 
 ---
 
@@ -162,7 +151,4 @@ coop_app/
 
 ---
 
-## Course
 
-**CPS 406** — Software Engineering
-Co-op Support Application — Sprint 1
