@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Application Submitted{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6 text-center py-5">
+    <i class="bi bi-check-circle-fill text-success" style="font-size:4rem;"></i>
+    <h2 class="fw-bold mt-3">Application Submitted!</h2>
+    <p class="text-muted">Your co-op application has been received. A confirmation email has been sent to <strong>{{ application.email }}</strong>.</p>
+    <div class="card p-4 text-start mt-4">
+      <h6 class="fw-semibold text-muted mb-3">Application Summary</h6>
+      <dl class="row mb-0">
+        <dt class="col-sm-4">Name</dt><dd class="col-sm-8">{{ application.student_name }}</dd>
+        <dt class="col-sm-4">Student ID</dt><dd class="col-sm-8">{{ application.student_id }}</dd>
+        <dt class="col-sm-4">Email</dt><dd class="col-sm-8">{{ application.email }}</dd>
+        <dt class="col-sm-4">Status</dt>
+        <dd class="col-sm-8"><span class="badge bg-secondary">{{ application.status }}</span></dd>
+        <dt class="col-sm-4">Submitted</dt><dd class="col-sm-8">{{ application.created_at.strftime('%B %d, %Y at %I:%M %p') }}</dd>
+      </dl>
+    </div>
+    <p class="text-muted mt-4 small">The co-op coordinator will review your application and notify you by email once a decision has been made.</p>
+    <a href="{{ url_for('index') }}" class="btn btn-outline-primary mt-2">Back to Home</a>
+  </div>
+</div>
+{% endblock %}

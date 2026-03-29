@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% block title %}Application — {{ application.student_name }}{% endblock %}
+{% block content %}
+<div class="mb-3">
+  <a href="{{ url_for('coordinator_dashboard') }}" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+  </a>
+</div>
+
+<div class="row g-4">
+  <!-- Left: Student Info -->
+  <div class="col-lg-4">
+    <div class="card p-4 mb-3">
+      <h5 class="fw-bold mb-3"><i class="bi bi-person-fill me-2 text-primary"></i>Student Info</h5>
+      <dl class="row mb-0 small">
+        <dt class="col-5">Name</dt><dd class="col-7">{{ application.student_name }}</dd>
+        <dt class="col-5">Student ID</dt><dd class="col-7"><code>{{ application.student_id }}</code></dd>
+        <dt class="col-5">Email</dt><dd class="col-7 text-break">{{ application.email }}</dd>
+        <dt class="col-5">GPA</dt><dd class="col-7">{{ application.gpa if application.gpa else '—' }}</dd>
+        <dt class="col-5">Applied</dt><dd class="col-7">{{ application.created_at.strftime('%b %d, %Y') }}</dd>
+        <dt class="col-5">Status</dt>
+        <dd class="col-7">
+          {% set sc = {'Pending':'secondary','Provisionally Accepted':'primary','Provisionally Rejected':'danger','Finally Accepted':'success','Finally Rejected':'danger'} %}
+          <span class="badge bg-{{ sc.get(application.status,'secondary') }}">{{ application.status }}</span>
+        </dd>
+        {% if application.provisional_date %}
+        <dt class="col-5">Prov. Date</dt><dd class="col-7">{{ application.provisional_date.strftime('%b %d, %Y') }}</dd>
+        {% endif %}
+        {% if application.final_decision_due %}
+        <dt class="col-5">Final Due</dt><dd class="col-7">{{ application.final_decision_due.strftime('%b %d, %Y') }}</dd>
+        {% endif %}
+        {% if application.final_decision_date %}
+        <dt class="col-5">Final Date</dt><dd class="col-7">{{ application.final_decision_date.strftime('%b %d, %Y') }}</dd>
+        {% endif %}
+      </dl>
+      {% if application.notes %}
+      <hr>
+      <p class="small mb-0"><strong>Notes:</strong> {{ application.notes }}</p>
+      {% endif %}
+    </div>
+
+    <!-- Work Term Report -->
+    <div class="card p-4 mb-3">
+      <h6 class="fw-bold mb-2"><i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i>Work Term Report</h6>
+      {% if report %}
+        <p class="small mb-1 text-success"><i class="bi bi-check-circle-fill me-1"></i>Submitted: {{ report.submitted_at.strftime('%b %d, %Y') }}</p>
+        <p class="small mb-0 text-muted">{{ report.original_filename }} ({{ report.term }})</p>
+      {% else %}
+        <p class="small text-muted mb-0"><i class="bi bi-x-circle text-danger me-1"></i>Not submitted yet.</p>
+      {% endif %}
+    </div>
+
+    <!-- Evaluations -->
+    <div class="card p-4 mb-3">
+      <h6 class="fw-bold mb-2"><i class="bi bi-star-fill text-warning me-1"></i>Employer Evaluations</h6>
+      {% if evaluations %}
+        {% for ev in evaluations %}
+          <div class="border rounded p-2 mb-2 small">
+            <div class="fw-semibold">{{ ev.employer.name }}</div>
+            <div class="text-muted">{{ ev.submission_type|capitalize }} — {{ ev.submitted_at.strftime('%b %d, %Y') }}</div>
+            {% if ev.behavior_score %}
+            <div>Behaviour: {{ ev.behavior_score }}/5 | Skills: {{ ev.skills_score }}/5 | Knowledge: {{ ev.knowledge_score }}/5 | Attitude: {{ ev.attitude_score }}/5</div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="small text-muted mb-0"><i class="bi bi-x-circle text-danger me-1"></i>No evaluations yet.</p>
+      {% endif %}
+    </div>
+
+    <!-- Placement Rejections -->
+    <div class="card p-4">
+      <h6 class="fw-bold mb-2"><i class="bi bi-x-octagon-fill text-secondary me-1"></i>Placement Rejections</h6>
+      {% if application.rejections %}
+        {% for r in application.rejections %}
+          <div class="border rounded p-2 mb-2 small">
+            <div class="fw-semibold">{{ r.company_name or 'Unknown Company' }}</div>
+            <div class="text-muted">{{ r.rejection_date.strftime('%b %d, %Y') }}</div>
+            {% if r.reason %}<div>{{ r.reason }}</div>{% endif %}
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="small text-muted mb-0">No placement rejections recorded.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Right: Decision Forms -->
+  <div class="col-lg-8">
+
+    <!-- Provisional Decision -->
+    {% if application.status == 'Pending' %}
+    <div class="card p-4 mb-3 border-primary border-opacity-25">
+      <h5 class="fw-bold mb-3"><i class="bi bi-hourglass-split text-primary me-2"></i>Provisional Decision</h5>
+      <form method="POST" action="{{ url_for('coordinator_decide', app_id=application.id) }}">
+        <input type="hidden" name="decision_type" value="provisional">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Expected Final Decision Date <span class="text-muted fw-normal">(optional)</span></label>
+          <input type="date" name="final_due" class="form-control">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Notes <span class="text-muted fw-normal">(optional)</span></label>
+          <textarea name="notes" class="form-control" rows="2" placeholder="Internal notes…">{{ application.notes or '' }}</textarea>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="submit" name="decision" value="accept" class="btn btn-primary flex-fill"
+                  onclick="return confirm('Provisionally accept {{ application.student_name }}?')">
+            <i class="bi bi-check-lg me-1"></i>Provisionally Accept
+          </button>
+          <button type="submit" name="decision" value="reject" class="btn btn-danger flex-fill"
+                  onclick="return confirm('Provisionally reject {{ application.student_name }}?')">
+            <i class="bi bi-x-lg me-1"></i>Provisionally Reject
+          </button>
+        </div>
+      </form>
+    </div>
+    {% endif %}
+
+    <!-- Final Decision -->
+    {% if application.status == 'Provisionally Accepted' %}
+    <div class="card p-4 mb-3 border-success border-opacity-25">
+      <h5 class="fw-bold mb-3"><i class="bi bi-check2-circle text-success me-2"></i>Final Decision</h5>
+      <form method="POST" action="{{ url_for('coordinator_decide', app_id=application.id) }}">
+        <input type="hidden" name="decision_type" value="final">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Notes <span class="text-muted fw-normal">(optional)</span></label>
+          <textarea name="notes" class="form-control" rows="2" placeholder="Internal notes…">{{ application.notes or '' }}</textarea>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="submit" name="decision" value="accept" class="btn btn-success flex-fill"
+                  onclick="return confirm('Finally accept {{ application.student_name }}?')">
+            <i class="bi bi-check-circle me-1"></i>Finally Accept
+          </button>
+          <button type="submit" name="decision" value="reject" class="btn btn-danger flex-fill"
+                  onclick="return confirm('Finally reject {{ application.student_name }}?')">
+            <i class="bi bi-x-circle me-1"></i>Finally Reject
+          </button>
+        </div>
+      </form>
+    </div>
+    {% endif %}
+
+    <!-- Final decision already made -->
+    {% if application.status in ('Finally Accepted', 'Finally Rejected') %}
+    <div class="alert alert-{{ 'success' if application.status == 'Finally Accepted' else 'danger' }}">
+      <i class="bi bi-{{ 'check-circle-fill' if application.status == 'Finally Accepted' else 'x-circle-fill' }} me-2"></i>
+      Final decision recorded: <strong>{{ application.status }}</strong> on {{ application.final_decision_date.strftime('%B %d, %Y') }}.
+    </div>
+    {% endif %}
+
+    <!-- Log Placement Rejection -->
+    {% if application.status in ('Provisionally Accepted', 'Finally Accepted') %}
+    <div class="card p-4">
+      <h5 class="fw-bold mb-3"><i class="bi bi-building-x text-secondary me-2"></i>Log Placement Rejection</h5>
+      <form method="POST" action="{{ url_for('coordinator_decide', app_id=application.id) }}">
+        <input type="hidden" name="decision_type" value="placement_rejection">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Company Name</label>
+          <input type="text" name="company" class="form-control" placeholder="Company that rejected the student">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Reason <span class="text-muted fw-normal">(optional)</span></label>
+          <textarea name="reason" class="form-control" rows="2" placeholder="Reason for rejection…"></textarea>
+        </div>
+        <button type="submit" class="btn btn-outline-secondary">
+          <i class="bi bi-journal-plus me-1"></i>Log Rejection
+        </button>
+      </form>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Co-op Portal — Home{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8 text-center py-5">
+    <i class="bi bi-briefcase-fill text-primary" style="font-size:4rem;"></i>
+    <h1 class="fw-bold mt-3">Co-op Support Portal</h1>
+    <p class="lead text-muted">Apply for the co-op program, manage your work term, and track your progress — all in one place.</p>
+    <hr class="my-4">
+    <div class="row g-4 text-start mt-2">
+      <div class="col-md-4">
+        <div class="card h-100 p-3">
+          <i class="bi bi-person-plus-fill text-primary fs-2 mb-2"></i>
+          <h5>Students</h5>
+          <p class="text-muted small">Submit your co-op application online. Once provisionally accepted, access your student portal to upload work term reports.</p>
+          <a href="{{ url_for('apply') }}" class="btn btn-primary btn-sm mt-auto">Apply Now</a>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card h-100 p-3">
+          <i class="bi bi-clipboard2-check-fill text-success fs-2 mb-2"></i>
+          <h5>Coordinators</h5>
+          <p class="text-muted small">Review and manage student applications. Make provisional and final decisions, and generate reports on program status.</p>
+          <a href="{{ url_for('login') }}" class="btn btn-success btn-sm mt-auto">Coordinator Login</a>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card h-100 p-3">
+          <i class="bi bi-building-fill text-warning fs-2 mb-2"></i>
+          <h5>Employers</h5>
+          <p class="text-muted small">Register as a work supervisor and submit student evaluations — either as an online form or by uploading a PDF.</p>
+          <a href="{{ url_for('employer_register') }}" class="btn btn-warning btn-sm mt-auto">Employer Sign-up</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

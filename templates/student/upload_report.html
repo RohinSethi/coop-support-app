@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Upload Work Term Report{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="mb-3">
+      <a href="{{ url_for('student_dashboard') }}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Back to Portal
+      </a>
+    </div>
+    <div class="card p-4">
+      <h4 class="fw-bold mb-1"><i class="bi bi-upload text-primary me-2"></i>Upload Work Term Report</h4>
+      <p class="text-muted mb-3">Upload your completed work term report in PDF format.</p>
+
+      <div class="alert alert-warning small py-2 mb-4">
+        <i class="bi bi-calendar-event me-1"></i>
+        <strong>Deadline:</strong> {{ deadline.strftime('%B %d, %Y') }}
+      </div>
+
+      <form method="POST" enctype="multipart/form-data" novalidate>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Work Term</label>
+          <select name="term" class="form-select">
+            <option>Fall 2024</option>
+            <option>Winter 2025</option>
+            <option>Summer 2025</option>
+            <option>Fall 2025</option>
+            <option>Winter 2026</option>
+          </select>
+        </div>
+        <div class="mb-4">
+          <label class="form-label fw-semibold">Report File <span class="text-danger">*</span></label>
+          <input type="file" name="report_file" class="form-control" accept=".pdf" required>
+          <div class="form-text">PDF files only. Maximum size: 16 MB.</div>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">
+          <i class="bi bi-upload me-1"></i>Submit Report
+        </button>
+      </form>
+
+      <hr class="my-3">
+      <p class="small text-muted mb-1">Need the report template?</p>
+      <a href="{{ url_for('download_template') }}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-download me-1"></i>Download Report Template
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

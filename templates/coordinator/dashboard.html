@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block title %}Coordinator Dashboard{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h3 class="fw-bold mb-0"><i class="bi bi-clipboard2-data-fill text-primary me-2"></i>Coordinator Dashboard</h3>
+  <a href="{{ url_for('coordinator_reports') }}" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-bar-chart me-1"></i>Reports
+  </a>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-2">
+    <div class="card stat-card p-3" style="border-color:#6c757d;">
+      <div class="text-muted small">Total</div>
+      <div class="fs-3 fw-bold">{{ stats.total }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-2">
+    <div class="card stat-card p-3" style="border-color:#ffc107;">
+      <div class="text-muted small">Pending</div>
+      <div class="fs-3 fw-bold text-warning">{{ stats.pending }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-2">
+    <div class="card stat-card p-3" style="border-color:#0d6efd;">
+      <div class="text-muted small">Prov. Accepted</div>
+      <div class="fs-3 fw-bold text-primary">{{ stats.prov_accepted }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-2">
+    <div class="card stat-card p-3" style="border-color:#dc3545;">
+      <div class="text-muted small">Prov. Rejected</div>
+      <div class="fs-3 fw-bold text-danger">{{ stats.prov_rejected }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-2">
+    <div class="card stat-card p-3" style="border-color:#198754;">
+      <div class="text-muted small">Finally Accepted</div>
+      <div class="fs-3 fw-bold text-success">{{ stats.finally_accepted }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-2">
+    <div class="card stat-card p-3" style="border-color:#dc3545;">
+      <div class="text-muted small">Finally Rejected</div>
+      <div class="fs-3 fw-bold text-danger">{{ stats.finally_rejected }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="card p-3 mb-3">
+  <form method="GET" class="row g-2 align-items-end">
+    <div class="col-md-5">
+      <label class="form-label small fw-semibold mb-1">Search</label>
+      <input type="text" name="search" class="form-control form-control-sm" placeholder="Name, student ID, or email…" value="{{ search }}">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label small fw-semibold mb-1">Filter by Status</label>
+      <select name="status" class="form-select form-select-sm">
+        <option value="all" {% if status_filter=='all' %}selected{% endif %}>All</option>
+        <option value="Pending" {% if status_filter=='Pending' %}selected{% endif %}>Pending</option>
+        <option value="Provisionally Accepted" {% if status_filter=='Provisionally Accepted' %}selected{% endif %}>Provisionally Accepted</option>
+        <option value="Provisionally Rejected" {% if status_filter=='Provisionally Rejected' %}selected{% endif %}>Provisionally Rejected</option>
+        <option value="Finally Accepted" {% if status_filter=='Finally Accepted' %}selected{% endif %}>Finally Accepted</option>
+        <option value="Finally Rejected" {% if status_filter=='Finally Rejected' %}selected{% endif %}>Finally Rejected</option>
+      </select>
+    </div>
+    <div class="col-md-3 d-flex gap-2">
+      <button type="submit" class="btn btn-primary btn-sm flex-fill">
+        <i class="bi bi-search me-1"></i>Filter
+      </button>
+      <a href="{{ url_for('coordinator_dashboard') }}" class="btn btn-outline-secondary btn-sm">Reset</a>
+    </div>
+  </form>
+</div>
+
+<!-- Applications Table -->
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Student ID</th>
+          <th>Email</th>
+          <th>GPA</th>
+          <th>Status</th>
+          <th>Submitted</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for app in applications %}
+        <tr>
+          <td class="text-muted small">{{ app.id }}</td>
+          <td class="fw-semibold">{{ app.student_name }}</td>
+          <td><code>{{ app.student_id }}</code></td>
+          <td class="small">{{ app.email }}</td>
+          <td>{{ app.gpa if app.gpa else '—' }}</td>
+          <td>
+            {% set sc = {'Pending':'secondary','Provisionally Accepted':'primary','Provisionally Rejected':'danger','Finally Accepted':'success','Finally Rejected':'danger'} %}
+            <span class="badge bg-{{ sc.get(app.status, 'secondary') }}">{{ app.status }}</span>
+          </td>
+          <td class="small text-muted">{{ app.created_at.strftime('%b %d, %Y') }}</td>
+          <td>
+            <a href="{{ url_for('coordinator_application', app_id=app.id) }}" class="btn btn-outline-primary btn-sm">
+              Review
+            </a>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" class="text-center text-muted py-4">No applications found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

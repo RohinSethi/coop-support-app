@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h3 class="fw-bold mb-0"><i class="bi bi-bar-chart-fill text-primary me-2"></i>Reports & Tracking</h3>
+  <div class="d-flex gap-2">
+    <form method="POST" action="{{ url_for('send_reminders') }}">
+      <button type="submit" class="btn btn-warning btn-sm"
+              onclick="return confirm('Send reminder emails to all students without submitted reports?')">
+        <i class="bi bi-bell-fill me-1"></i>Send Reminders
+      </button>
+    </form>
+    <a href="{{ url_for('coordinator_dashboard') }}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left me-1"></i>Dashboard
+    </a>
+  </div>
+</div>
+
+<!-- Summary cards -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card p-3 text-center">
+      <div class="fs-2 fw-bold text-primary">{{ all_apps|length }}</div>
+      <div class="text-muted small">Total Applications</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card p-3 text-center">
+      <div class="fs-2 fw-bold text-success">{{ accepted|length }}</div>
+      <div class="text-muted small">Accepted (Prov. or Final)</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card p-3 text-center">
+      <div class="fs-2 fw-bold text-info">{{ with_reports|length }}</div>
+      <div class="text-muted small">Reports Submitted</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card p-3 text-center">
+      <div class="fs-2 fw-bold text-warning">{{ without_reports|length }}</div>
+      <div class="text-muted small">Reports Missing</div>
+    </div>
+  </div>
+</div>
+
+<!-- All Applications List -->
+<div class="card mb-4">
+  <div class="card-header fw-semibold">All Applicants — Provisional &amp; Final Decisions</div>
+  <div class="table-responsive">
+    <table class="table table-sm table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Name</th><th>Student ID</th><th>Status</th>
+          <th>Prov. Date</th><th>Final Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for app in all_apps %}
+        <tr>
+          <td><a href="{{ url_for('coordinator_application', app_id=app.id) }}">{{ app.student_name }}</a></td>
+          <td><code>{{ app.student_id }}</code></td>
+          <td>
+            {% set sc = {'Pending':'secondary','Provisionally Accepted':'primary','Provisionally Rejected':'danger','Finally Accepted':'success','Finally Rejected':'danger'} %}
+            <span class="badge bg-{{ sc.get(app.status,'secondary') }}">{{ app.status }}</span>
+          </td>
+          <td class="small text-muted">{{ app.provisional_date.strftime('%b %d, %Y') if app.provisional_date else '—' }}</td>
+          <td class="small text-muted">{{ app.final_decision_date.strftime('%b %d, %Y') if app.final_decision_date else '—' }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="text-center text-muted py-3">No applications yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Report Submission Status -->
+<div class="row g-4 mb-4">
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header fw-semibold text-success"><i class="bi bi-check-circle me-1"></i>Reports Submitted ({{ with_reports|length }})</div>
+      <ul class="list-group list-group-flush">
+        {% for app in with_reports %}
+        <li class="list-group-item d-flex justify-content-between align-items-center small">
+          <a href="{{ url_for('coordinator_application', app_id=app.id) }}">{{ app.student_name }}</a>
+          <span class="badge bg-success">Submitted</span>
+        </li>
+        {% else %}
+        <li class="list-group-item text-muted">None yet.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header fw-semibold text-danger"><i class="bi bi-x-circle me-1"></i>Reports Missing ({{ without_reports|length }})</div>
+      <ul class="list-group list-group-flush">
+        {% for app in without_reports %}
+        <li class="list-group-item d-flex justify-content-between align-items-center small">
+          <a href="{{ url_for('coordinator_application', app_id=app.id) }}">{{ app.student_name }}</a>
+          <span class="badge bg-warning text-dark">Missing</span>
+        </li>
+        {% else %}
+        <li class="list-group-item text-muted">None missing.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Evaluation Status -->
+<div class="row g-4">
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header fw-semibold text-success"><i class="bi bi-star-fill me-1"></i>Evaluations Received ({{ with_evals|length }})</div>
+      <ul class="list-group list-group-flush">
+        {% for app in with_evals %}
+        <li class="list-group-item small">
+          <a href="{{ url_for('coordinator_application', app_id=app.id) }}">{{ app.student_name }}</a>
+        </li>
+        {% else %}
+        <li class="list-group-item text-muted">None yet.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header fw-semibold text-danger"><i class="bi bi-star me-1"></i>Evaluations Missing ({{ without_evals|length }})</div>
+      <ul class="list-group list-group-flush">
+        {% for app in without_evals %}
+        <li class="list-group-item small">
+          <a href="{{ url_for('coordinator_application', app_id=app.id) }}">{{ app.student_name }}</a>
+        </li>
+        {% else %}
+        <li class="list-group-item text-muted">None missing.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

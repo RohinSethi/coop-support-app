@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block title %}Submit Evaluation{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="mb-3">
+      <a href="{{ url_for('employer_dashboard') }}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+      </a>
+    </div>
+    <div class="card p-4">
+      <h4 class="fw-bold mb-1"><i class="bi bi-star-fill text-warning me-2"></i>Submit Student Evaluation</h4>
+      <p class="text-muted mb-4">Evaluate your co-op student either via the online form or by uploading a signed PDF.</p>
+
+      <form method="POST" enctype="multipart/form-data" novalidate id="evalForm">
+
+        <!-- Student Selection -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Select Student</label>
+          <select name="student_user_id" class="form-select">
+            <option value="">— Select a registered student —</option>
+            {% for s in students %}
+            <option value="{{ s.id }}">{{ s.name }} ({{ s.student_id }})</option>
+            {% endfor %}
+          </select>
+          <div class="form-text">If the student is not listed, enter their details manually below.</div>
+        </div>
+        <div class="row g-2 mb-4">
+          <div class="col-md-6">
+            <input type="text" name="student_name_manual" class="form-control form-control-sm"
+                   placeholder="Student name (if not listed above)">
+          </div>
+          <div class="col-md-6">
+            <input type="text" name="student_id_manual" class="form-control form-control-sm"
+                   placeholder="Student ID (if not listed above)">
+          </div>
+        </div>
+
+        <!-- Submission type tabs -->
+        <ul class="nav nav-tabs mb-4" id="evalTabs">
+          <li class="nav-item">
+            <button class="nav-link active" type="button" onclick="switchTab('online')" id="tab-online">
+              <i class="bi bi-laptop me-1"></i>Online Form
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" type="button" onclick="switchTab('pdf')" id="tab-pdf">
+              <i class="bi bi-file-earmark-pdf me-1"></i>Upload PDF
+            </button>
+          </li>
+        </ul>
+        <input type="hidden" name="submission_type" id="submission_type" value="online">
+
+        <!-- Online Form -->
+        <div id="section-online">
+          <p class="text-muted small mb-3">Rate your student from 1 (Poor) to 5 (Excellent) in each category.</p>
+          {% for field, label in [('behavior_score','Behaviour & Professionalism'),('skills_score','Technical Skills'),('knowledge_score','Knowledge & Learning'),('attitude_score','Attitude & Initiative')] %}
+          <div class="mb-3">
+            <label class="form-label fw-semibold">{{ label }}</label>
+            <div class="d-flex gap-3">
+              {% for i in range(1,6) %}
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="{{ field }}" value="{{ i }}" id="{{ field }}_{{ i }}"
+                       {{ 'checked' if i == 3 }}>
+                <label class="form-check-label" for="{{ field }}_{{ i }}">{{ i }}</label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Overall Comments</label>
+            <textarea name="overall_comments" class="form-control" rows="4"
+                      placeholder="Describe the student's overall performance, strengths, and areas for improvement…"></textarea>
+          </div>
+        </div>
+
+        <!-- PDF Upload -->
+        <div id="section-pdf" style="display:none;">
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Evaluation PDF <span class="text-danger">*</span></label>
+            <input type="file" name="eval_pdf" class="form-control" accept=".pdf">
+            <div class="form-text">Upload your completed and signed evaluation form as a PDF. Max 16 MB.</div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-warning w-100 fw-semibold">
+          <i class="bi bi-send me-1"></i>Submit Evaluation
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function switchTab(type) {
+  document.getElementById('submission_type').value = type;
+  document.getElementById('section-online').style.display = type === 'online' ? '' : 'none';
+  document.getElementById('section-pdf').style.display   = type === 'pdf'    ? '' : 'none';
+  document.getElementById('tab-online').classList.toggle('active', type === 'online');
+  document.getElementById('tab-pdf').classList.toggle('active',    type === 'pdf');
+}
+</script>
+{% endblock %}

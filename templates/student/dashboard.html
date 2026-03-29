@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block title %}Student Portal{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h3 class="fw-bold mb-0"><i class="bi bi-mortarboard-fill text-primary me-2"></i>Student Portal</h3>
+  <span class="text-muted small">Welcome, {{ current_user.name }}</span>
+</div>
+
+<div class="row g-4">
+  <!-- Application Status -->
+  <div class="col-lg-5">
+    <div class="card p-4 mb-3">
+      <h5 class="fw-bold mb-3"><i class="bi bi-file-earmark-person-fill text-primary me-2"></i>My Application</h5>
+      {% if application %}
+        {% set sc = {'Pending':'secondary','Provisionally Accepted':'primary','Provisionally Rejected':'danger','Finally Accepted':'success','Finally Rejected':'danger'} %}
+        <dl class="row mb-0 small">
+          <dt class="col-5">Name</dt><dd class="col-7">{{ application.student_name }}</dd>
+          <dt class="col-5">Student ID</dt><dd class="col-7"><code>{{ application.student_id }}</code></dd>
+          <dt class="col-5">Email</dt><dd class="col-7 text-break">{{ application.email }}</dd>
+          <dt class="col-5">GPA</dt><dd class="col-7">{{ application.gpa if application.gpa else '—' }}</dd>
+          <dt class="col-5">Status</dt>
+          <dd class="col-7">
+            <span class="badge bg-{{ sc.get(application.status,'secondary') }} fs-6">{{ application.status }}</span>
+          </dd>
+          {% if application.provisional_date %}
+          <dt class="col-5">Prov. Decision</dt><dd class="col-7">{{ application.provisional_date.strftime('%b %d, %Y') }}</dd>
+          {% endif %}
+          {% if application.final_decision_due %}
+          <dt class="col-5">Final Due By</dt>
+          <dd class="col-7 text-info fw-semibold">{{ application.final_decision_due.strftime('%B %d, %Y') }}</dd>
+          {% endif %}
+          {% if application.final_decision_date %}
+          <dt class="col-5">Final Decision</dt><dd class="col-7">{{ application.final_decision_date.strftime('%b %d, %Y') }}</dd>
+          {% endif %}
+        </dl>
+      {% else %}
+        <p class="text-muted small">No application found for your account.</p>
+      {% endif %}
+    </div>
+
+    <!-- Placement Rejection History -->
+    {% if application and application.rejections %}
+    <div class="card p-4">
+      <h6 class="fw-bold mb-2"><i class="bi bi-journal-x text-secondary me-1"></i>Placement History</h6>
+      {% for r in application.rejections %}
+      <div class="border rounded p-2 mb-2 small">
+        <div class="fw-semibold">{{ r.company_name or 'Unknown Company' }}</div>
+        <div class="text-muted">Rejected: {{ r.rejection_date.strftime('%b %d, %Y') }}</div>
+        {% if r.reason %}<div class="text-muted">{{ r.reason }}</div>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Work Term Reports -->
+  <div class="col-lg-7">
+    <div class="card p-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0"><i class="bi bi-file-earmark-pdf-fill text-danger me-2"></i>Work Term Reports</h5>
+        <a href="{{ url_for('student_upload_report') }}" class="btn btn-primary btn-sm">
+          <i class="bi bi-upload me-1"></i>Upload Report
+        </a>
+      </div>
+
+      <div class="alert alert-info small py-2 mb-3">
+        <i class="bi bi-calendar-event me-1"></i>
+        <strong>Submission Deadline:</strong> {{ deadline.strftime('%B %d, %Y') }}
+        {% if deadline < now %}
+          <span class="badge bg-danger ms-2">Overdue</span>
+        {% endif %}
+      </div>
+
+      <div class="mb-3">
+        <a href="{{ url_for('download_template') }}" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-download me-1"></i>Download Report Template (PDF)
+        </a>
+      </div>
+
+      {% if reports %}
+        <div class="list-group">
+          {% for r in reports %}
+          <div class="list-group-item">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <i class="bi bi-file-earmark-pdf-fill text-danger me-2"></i>
+                <strong>{{ r.term or 'Work Term' }}</strong>
+                <div class="small text-muted mt-1">
+                  {{ r.original_filename }} &mdash; submitted {{ r.submitted_at.strftime('%b %d, %Y') }}
+                </div>
+                {% if r.deadline %}
+                <div class="small text-muted">Deadline: {{ r.deadline.strftime('%b %d, %Y') }}</div>
+                {% endif %}
+              </div>
+              <span class="badge bg-success"><i class="bi bi-check-lg"></i> Submitted</span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-center text-muted py-4">
+          <i class="bi bi-file-earmark-x fs-2 d-block mb-2"></i>
+          No reports submitted yet. Upload your work term report above.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

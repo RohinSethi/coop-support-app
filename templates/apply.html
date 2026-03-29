@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Apply for Co-op{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="card p-4">
+      <h3 class="fw-bold mb-1"><i class="bi bi-send-fill text-primary me-2"></i>Co-op Application</h3>
+      <p class="text-muted mb-4">Fill out the form below to apply for the co-op program.</p>
+      <form method="POST" novalidate>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
+          <input type="text" name="name" class="form-control" placeholder="Jane Doe"
+                 value="{{ form_data.get('name', '') }}" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Student ID <span class="text-danger">*</span></label>
+          <input type="text" name="student_id" class="form-control" placeholder="9-digit ID (e.g. 500123456)"
+                 value="{{ form_data.get('student_id', '') }}" maxlength="9" required>
+          <div class="form-text">Must be exactly 9 digits.</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Student Email <span class="text-danger">*</span></label>
+          <input type="email" name="email" class="form-control" placeholder="jane.doe@torontomu.ca"
+                 value="{{ form_data.get('email', '') }}" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">GPA <span class="text-muted fw-normal">(optional)</span></label>
+          <input type="number" name="gpa" class="form-control" placeholder="e.g. 3.5"
+                 value="{{ form_data.get('gpa', '') }}" min="0" max="4.0" step="0.01">
+          <div class="form-text">Enter your cumulative GPA out of 4.0.</div>
+        </div>
+        <hr class="my-3">
+        <p class="small text-muted mb-2">Create a password to use when logging into the student portal if accepted.</p>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Password <span class="text-danger">*</span></label>
+          <input type="password" name="password" class="form-control" placeholder="At least 6 characters" required>
+        </div>
+        <div class="mb-4">
+          <label class="form-label fw-semibold">Confirm Password <span class="text-danger">*</span></label>
+          <input type="password" name="confirm_password" class="form-control" placeholder="Re-enter your password" required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">
+          <i class="bi bi-send me-1"></i>Submit Application
+        </button>
+      </form>
+      <hr class="my-3">
+      <p class="text-center small text-muted mb-0">Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}
