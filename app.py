@@ -673,6 +673,9 @@ def init_db():
             print('Coordinator created: coordinator@coop.com / admin123')
         print('Database ready.')
 
+# Run on startup regardless of how the app is launched (gunicorn or python app.py)
+init_db()
+
 
 if __name__ == '__main__':
     init_db()
