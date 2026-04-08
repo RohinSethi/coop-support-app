@@ -33,8 +33,14 @@ def validate_student_id(sid):
     return bool(re.match(r'^\d{9}$', sid))
 
 
+ALLOWED_EMAIL_DOMAIN = 'torontomu.ca'
+
 def validate_email(email):
-    return bool(re.match(r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$', email))
+    if not re.match(r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$', email):
+        return False, 'Please enter a valid email address.'
+    if not email.lower().endswith(f'@{ALLOWED_EMAIL_DOMAIN}'):
+        return False, f'Only @{ALLOWED_EMAIL_DOMAIN} email addresses are accepted.'
+    return True, None
 
 
 def send_email_notification(to_email, subject, body):
@@ -157,8 +163,10 @@ def apply():
             errors.append('Student ID must be exactly 9 digits.')
         if not email:
             errors.append('Email address is required.')
-        elif not validate_email(email):
-            errors.append('Please enter a valid email address.')
+        else:
+            ok, email_err = validate_email(email)
+            if not ok:
+                errors.append(email_err)
         if not password:
             errors.append('Password is required.')
         elif len(password) < 6:
@@ -570,7 +578,7 @@ def employer_register():
         errors = []
         if not name:
             errors.append('Name is required.')
-        if not email or not validate_email(email):
+        if not email or not re.match(r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$', email):
             errors.append('A valid email is required.')
         if not password or len(password) < 6:
             errors.append('Password must be at least 6 characters.')

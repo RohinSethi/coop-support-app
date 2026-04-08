@@ -22,6 +22,7 @@
           <label class="form-label fw-semibold">Student Email <span class="text-danger">*</span></label>
           <input type="email" name="email" class="form-control" placeholder="jane.doe@torontomu.ca"
                  value="{{ form_data.get('email', '') }}" required>
+          <div class="form-text">Must be a TorontoMU email address (@torontomu.ca).</div>
         </div>
         <div class="mb-3">
           <label class="form-label fw-semibold">GPA <span class="text-muted fw-normal">(optional)</span></label>
