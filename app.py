@@ -7,6 +7,12 @@ from datetime import datetime
 import os
 import re
 import io
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'coop-support-app-secret-2024')
@@ -44,12 +50,34 @@ def validate_email(email):
 
 
 def send_email_notification(to_email, subject, body):
-    """Simulated email — logs to console. Replace with Flask-Mail for production."""
-    print(f"\n{'='*60}")
-    print(f"  EMAIL TO:      {to_email}")
-    print(f"  SUBJECT:       {subject}")
-    print(f"  BODY:\n{body}")
-    print(f"{'='*60}\n")
+    """Send email via Gmail SMTP using email_config.py credentials."""
+    try:
+        from email_config import MAIL_USERNAME, MAIL_PASSWORD
+        smtp_user = MAIL_USERNAME
+        smtp_pass = MAIL_PASSWORD
+    except ImportError:
+        smtp_user = smtp_pass = None
+
+    if smtp_user and smtp_pass and '@' in smtp_user and 'your_app_gmail' not in smtp_user:
+        try:
+            msg = MIMEMultipart()
+            msg['From'] = f'Co-op Portal <{smtp_user}>'
+            msg['To'] = to_email
+            msg['Subject'] = subject
+            msg.attach(MIMEText(body, 'plain'))
+            with smtplib.SMTP('smtp.gmail.com', 587) as server:
+                server.starttls()
+                server.login(smtp_user, smtp_pass)
+                server.sendmail(smtp_user, to_email, msg.as_string())
+            print(f"Email sent to {to_email}: {subject}")
+        except Exception as e:
+            print(f"Email failed: {e}")
+    else:
+        print(f"\n{'='*60}")
+        print(f"  EMAIL TO:      {to_email}")
+        print(f"  SUBJECT:       {subject}")
+        print(f"  BODY:\n{body}")
+        print(f"{'='*60}\n")
 
 
 # ─────────────────────────── MODELS ───────────────────────────
